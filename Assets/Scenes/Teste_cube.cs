@@ -19,3 +19,7 @@ public class Teste_cube : MonoBehaviour
         transform.Rotate(Vector3.up * 50 * Time.deltaTime);
     }
 }
+
+
+//coucou
+
