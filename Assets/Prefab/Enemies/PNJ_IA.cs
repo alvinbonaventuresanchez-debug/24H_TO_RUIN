@@ -23,6 +23,15 @@ public class PNJ_IA : MonoBehaviour
     [Header("Optionnel")]
     [SerializeField] private float gravite = -9.81f;
 
+    [Header("Character Controller")]
+    [SerializeField] private bool autoConfigurerCharacterController = true;
+    [SerializeField] private float controllerHeight = 1.8f;
+    [SerializeField] private float controllerRadius = 0.35f;
+    [SerializeField] private float skinWidth = 0.02f;
+    [SerializeField] private float stepOffset = 0f;
+    [SerializeField] private bool corrigerPositionAuDemarrage = true;
+    [SerializeField] private float margeDepenetration = 0.02f;
+
     [Header("Animation")]
     [SerializeField] private Animator animator;
     [SerializeField] private AnimationClip animationMarche;
@@ -35,10 +44,19 @@ public class PNJ_IA : MonoBehaviour
     private PlayableGraph animationGraph;
     private bool animationInitialisee;
 
+    void Start()
+    {
+        if (corrigerPositionAuDemarrage)
+        {
+            CorrigerPositionInitiale();
+        }
+    }
+
     void Awake()
     {
         characterController = GetComponent<CharacterController>();
         animator = animator != null ? animator : GetComponentInChildren<Animator>();
+        ConfigurerCharacterController();
         rotationCible = transform.rotation;
 
         if (directionAleatoireAuDepart)
@@ -90,7 +108,21 @@ public class PNJ_IA : MonoBehaviour
 
     void Reset()
     {
+        characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        ConfigurerCharacterController();
+    }
+
+    void OnValidate()
+    {
+        characterController = GetComponent<CharacterController>();
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        ConfigurerCharacterController();
     }
 
     void TournerVersLaDirection()
@@ -188,7 +220,6 @@ public class PNJ_IA : MonoBehaviour
         animationGraph = PlayableGraph.Create($"{name}_PNJ_IA_Animation");
         AnimationPlayableOutput output = AnimationPlayableOutput.Create(animationGraph, "Animation", animator);
 
-        animationMarche.wrapMode = WrapMode.Loop;
         AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(animationGraph, animationMarche);
         clipPlayable.SetApplyFootIK(true);
         clipPlayable.SetDuration(double.MaxValue);
@@ -211,6 +242,113 @@ public class PNJ_IA : MonoBehaviour
         }
 
         animationInitialisee = false;
-        
+    }
+
+    void ConfigurerCharacterController()
+    {
+        if (characterController == null)
+        {
+            return;
         }
+
+        if (autoConfigurerCharacterController)
+        {
+            float hauteur = Mathf.Max(controllerHeight, 0.2f);
+            float rayonMax = Mathf.Max((hauteur * 0.5f) - 0.01f, 0.05f);
+            float rayon = Mathf.Clamp(controllerRadius, 0.05f, rayonMax);
+
+            characterController.height = hauteur;
+            characterController.radius = rayon;
+            characterController.center = new Vector3(0f, hauteur * 0.5f, 0f);
+            characterController.skinWidth = Mathf.Clamp(skinWidth, 0.005f, rayon);
+            characterController.minMoveDistance = 0f;
+        }
+
+        characterController.stepOffset = Mathf.Clamp(stepOffset, 0f, CalculerStepOffsetMaximum());
+    }
+
+    float CalculerStepOffsetMaximum()
+    {
+        if (characterController == null)
+        {
+            return 0f;
+        }
+
+        Vector3 scale = transform.lossyScale;
+        float scaledHeight = Mathf.Abs(characterController.height * scale.y);
+        float radiusScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+        float scaledRadius = Mathf.Abs(characterController.radius) * radiusScale;
+        float maxScaledStepOffset = Mathf.Max(0f, scaledHeight + (scaledRadius * 2f) - 0.001f);
+        float stepScale = Mathf.Max(Mathf.Abs(scale.y), 0.0001f);
+
+        return maxScaledStepOffset / stepScale;
+    }
+
+    void CorrigerPositionInitiale()
+    {
+        if (characterController == null)
+        {
+            return;
+        }
+
+        Vector3 capsuleTop;
+        Vector3 capsuleBottom;
+        float capsuleRadius;
+        ConstruireCapsuleMonde(out capsuleTop, out capsuleBottom, out capsuleRadius);
+
+        Collider[] overlaps = Physics.OverlapCapsule(
+            capsuleTop,
+            capsuleBottom,
+            capsuleRadius,
+            obstacleMask,
+            QueryTriggerInteraction.Ignore);
+
+        Vector3 correction = Vector3.zero;
+
+        foreach (Collider overlap in overlaps)
+        {
+            if (overlap == characterController || overlap.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            if (Physics.ComputePenetration(
+                characterController,
+                transform.position,
+                transform.rotation,
+                overlap,
+                overlap.transform.position,
+                overlap.transform.rotation,
+                out Vector3 direction,
+                out float distance))
+            {
+                correction += direction * (distance + margeDepenetration);
+            }
+        }
+
+        if (correction.sqrMagnitude <= 0.000001f)
+        {
+            return;
+        }
+
+        bool etatInitial = characterController.enabled;
+        characterController.enabled = false;
+        transform.position += correction;
+        characterController.enabled = etatInitial;
+    }
+
+    void ConstruireCapsuleMonde(out Vector3 capsuleTop, out Vector3 capsuleBottom, out float capsuleRadius)
+    {
+        Vector3 scale = transform.lossyScale;
+        float scaledHeight = Mathf.Abs(characterController.height * scale.y);
+        float radiusScale = Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+        capsuleRadius = Mathf.Abs(characterController.radius) * radiusScale;
+
+        float demiHauteur = Mathf.Max((scaledHeight * 0.5f) - capsuleRadius, 0f);
+        Vector3 centreMonde = transform.TransformPoint(characterController.center);
+        Vector3 axe = transform.up * demiHauteur;
+
+        capsuleTop = centreMonde + axe;
+        capsuleBottom = centreMonde - axe;
+    }
 }
