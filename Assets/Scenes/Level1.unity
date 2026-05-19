@@ -13051,6 +13051,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Maze Cell
       objectReference: {fileID: 0}
+    - target: {fileID: 7688510621924752501, guid: 323248b47ad034c44881c058964ac88d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6.787
+      objectReference: {fileID: 0}
+    - target: {fileID: 7688510621924752501, guid: 323248b47ad034c44881c058964ac88d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.64
+      objectReference: {fileID: 0}
+    - target: {fileID: 7688510621924752501, guid: 323248b47ad034c44881c058964ac88d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.019538878
+      objectReference: {fileID: 0}
+    - target: {fileID: 7688510621924752501, guid: 323248b47ad034c44881c058964ac88d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.9998091
+      objectReference: {fileID: 0}
+    - target: {fileID: 7688510621924752501, guid: 323248b47ad034c44881c058964ac88d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -177.761
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
