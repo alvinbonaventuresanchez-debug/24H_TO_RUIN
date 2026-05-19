@@ -38,6 +38,12 @@ public class PlayerController : MonoBehaviour
 		controls = new PlayerControls();
 		cc = GetComponent<CharacterController>();
 		audio_steps = GetComponent<AudioSource>();
+
+		// Assure que le joueur a bien le tag Player pour les triggers de porte
+		if (gameObject.tag != "Player")
+		{
+			gameObject.tag = "Player";
+		}
 	}
 
 	void OnEnable()

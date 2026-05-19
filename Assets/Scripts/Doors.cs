@@ -5,36 +5,46 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class Doors : MonoBehaviour
 {
-    public GameObject door; 
+    public GameObject door;
     public Vector3 openPosition = new Vector3(0, 120, 0);
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    private bool active = true;
+
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.CompareTag("Player") && active)
+        {
             Open();
-    }
-    void Open()
-    {
-        door.transform.localEulerAngles = openPosition;
+        }
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.CompareTag("Player") && active)
+        {
             Close();
+        }
     }
+
+    void Open()
+    {
+        if (door == null)
+        {
+            Debug.LogError("Doors: aucune référence de porte assignée dans l'inspecteur.", gameObject);
+            return;
+        }
+
+        door.transform.localEulerAngles = openPosition;
+    }
+
     void Close()
     {
+        if (door == null)
+        {
+            Debug.LogError("Doors: aucune référence de porte assignée dans l'inspecteur.", gameObject);
+            return;
+        }
+
         door.transform.localEulerAngles = Vector3.zero;
     }
 }
