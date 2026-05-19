@@ -28,7 +28,7 @@ public class Doors : MonoBehaviour
         door.transform.localEulerAngles = openPosition;
     }
 
-    void OntriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
         if (other.gameObject.tag == "Player")
             Close();

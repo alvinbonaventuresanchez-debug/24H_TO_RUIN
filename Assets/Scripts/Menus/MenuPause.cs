@@ -8,7 +8,16 @@ public class MenuPause : MonoBehaviour
     {
         panelPause.SetActive(false);
     }
+//fonctionalités des boutons (options,retour au menu,etc)
+/*
+    public void OpenOptions(){
+    Debug.Log("Open options");
+    panelOption.SetActive(true);
+    }
+*/
 
+
+//afficher/cacher le menu pause 
     void Update()
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
