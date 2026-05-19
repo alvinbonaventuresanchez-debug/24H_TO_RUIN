@@ -1,21 +1,49 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 public class FreeCameraController : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 6f;
+    [SerializeField] private float moveSpeed = 4.5f;
+    [SerializeField] private float sprintMultiplier = 1.7f;
     [SerializeField] private float lookSensitivity = 0.12f;
     [SerializeField] private float maxPitch = 80f;
     [SerializeField] private bool lockCursorOnStart = true;
+    [SerializeField] private Transform cameraTransform;
 
     private float yaw;
     private float pitch;
 
+    public float MovementBlend { get; private set; }
+    public float SprintBlend { get; private set; }
+
+    private void Awake()
+    {
+        if (cameraTransform == null)
+        {
+            Camera childCamera = GetComponentInChildren<Camera>();
+
+            if (childCamera != null)
+            {
+                cameraTransform = childCamera.transform;
+            }
+        }
+    }
+
     private void Start()
     {
-        Vector3 currentRotation = transform.eulerAngles;
-        yaw = currentRotation.y;
-        pitch = NormalizeAngle(currentRotation.x);
+        yaw = NormalizeAngle(transform.eulerAngles.y);
+
+        if (cameraTransform != null && cameraTransform != transform)
+        {
+            pitch = NormalizeAngle(cameraTransform.localEulerAngles.x);
+        }
+        else
+        {
+            pitch = NormalizeAngle(transform.eulerAngles.x);
+        }
+
+        ApplyLookRotation();
 
         if (lockCursorOnStart)
         {
@@ -55,48 +83,103 @@ public class FreeCameraController : MonoBehaviour
         pitch -= mouseDelta.y * lookSensitivity;
         pitch = Mathf.Clamp(pitch, -maxPitch, maxPitch);
 
-        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+        ApplyLookRotation();
     }
 
     private void HandleMovement()
     {
         if (Keyboard.current == null)
         {
+            MovementBlend = Mathf.MoveTowards(MovementBlend, 0f, 8f * Time.deltaTime);
+            SprintBlend = Mathf.MoveTowards(SprintBlend, 0f, 10f * Time.deltaTime);
             return;
         }
 
-        Vector3 input = Vector3.zero;
+        Vector2 input = Vector2.zero;
 
-        if (Keyboard.current.upArrowKey.isPressed)
+        if (IsForwardPressed())
         {
-            input += Vector3.forward;
+            input.y += 1f;
         }
 
-        if (Keyboard.current.downArrowKey.isPressed)
+        if (IsBackwardPressed())
         {
-            input += Vector3.back;
+            input.y -= 1f;
         }
 
-        if (Keyboard.current.leftArrowKey.isPressed)
+        if (IsLeftPressed())
         {
-            input += Vector3.left;
+            input.x -= 1f;
         }
 
-        if (Keyboard.current.rightArrowKey.isPressed)
+        if (IsRightPressed())
         {
-            input += Vector3.right;
+            input.x += 1f;
         }
+
+        bool hasMovementInput = input.sqrMagnitude > 0f;
+        bool isSprinting = hasMovementInput && IsSprintPressed();
+
+        MovementBlend = Mathf.MoveTowards(MovementBlend, hasMovementInput ? 1f : 0f, 8f * Time.deltaTime);
+        SprintBlend = Mathf.MoveTowards(SprintBlend, isSprinting ? 1f : 0f, 10f * Time.deltaTime);
 
         if (input.sqrMagnitude > 1f)
         {
             input.Normalize();
         }
 
-        Vector3 flatForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-        Vector3 flatRight = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
-        Vector3 movement = (flatForward * input.z) + (flatRight * input.x);
+        Vector3 movement = (transform.forward * input.y) + (transform.right * input.x);
+        movement.y = 0f;
 
-        transform.position += movement * moveSpeed * Time.deltaTime;
+        float currentMoveSpeed = moveSpeed * Mathf.Lerp(1f, sprintMultiplier, SprintBlend);
+        transform.position += movement * currentMoveSpeed * Time.deltaTime;
+    }
+
+    private void ApplyLookRotation()
+    {
+        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+        if (cameraTransform != null && cameraTransform != transform)
+        {
+            cameraTransform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+    }
+
+    private bool IsForwardPressed()
+    {
+        return IsPressed(Keyboard.current.zKey)
+            || IsPressed(Keyboard.current.wKey)
+            || IsPressed(Keyboard.current.upArrowKey);
+    }
+
+    private bool IsBackwardPressed()
+    {
+        return IsPressed(Keyboard.current.sKey)
+            || IsPressed(Keyboard.current.downArrowKey);
+    }
+
+    private bool IsLeftPressed()
+    {
+        return IsPressed(Keyboard.current.qKey)
+            || IsPressed(Keyboard.current.aKey)
+            || IsPressed(Keyboard.current.leftArrowKey);
+    }
+
+    private bool IsRightPressed()
+    {
+        return IsPressed(Keyboard.current.dKey)
+            || IsPressed(Keyboard.current.rightArrowKey);
+    }
+
+    private bool IsSprintPressed()
+    {
+        return IsPressed(Keyboard.current.leftShiftKey)
+            || IsPressed(Keyboard.current.rightShiftKey);
+    }
+
+    private static bool IsPressed(KeyControl key)
+    {
+        return key != null && key.isPressed;
     }
 
     private void LockCursor()
