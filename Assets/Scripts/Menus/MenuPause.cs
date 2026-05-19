@@ -1,16 +1,20 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MenuPause : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public GameObject panelPause;
     void Start()
     {
-        
+        panelPause.SetActive(false);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            Debug.Log("menu pause");
+            panelPause.SetActive(!panelPause.activeInHierarchy);
+        }
     }
 }
