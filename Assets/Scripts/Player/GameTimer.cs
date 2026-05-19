@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class GameTimer : MonoBehaviour
 {
-    public float tempsRestant = 720f;
+    [SerializeField] private float tempsRestant = 720f;
     public TextMeshProUGUI timerText;
     [SerializeField] private Font timerFontSource;
     [SerializeField] private string timeoutSceneName = "Defeat";
@@ -13,6 +13,18 @@ public class GameTimer : MonoBehaviour
     private TMP_FontAsset timerFontAsset;
     private Font appliedFontSource;
     private bool hasTimerEnded;
+
+    public float TempsRestant
+    {
+        get => tempsRestant;
+        set
+        {
+            tempsRestant = Mathf.Max(0f, value);
+            UpdateTimerDisplay();
+        }
+    }
+
+    public bool HasTimerEnded => hasTimerEnded;
 
     void Awake()
     {

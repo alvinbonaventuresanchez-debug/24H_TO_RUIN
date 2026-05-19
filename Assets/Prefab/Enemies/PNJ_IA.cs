@@ -1,67 +1,155 @@
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 
-[RequireComponent(typeof(CharacterController))]
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class PNJ_IA : MonoBehaviour
 {
-    [SerializeField] private float vitesse = 2f;
-    [SerializeField] private float dureeAvance = 3f;
-    [SerializeField] private float gravite = -20f;
-    [SerializeField] private float forceAuSol = -2f;
-    [SerializeField] private PNJ_HitboxSuivi pnjHitbox;
+    [SerializeField] private float vitesse = 1f;
+    [SerializeField] private float dureeAvance = 1.5f;
+    [SerializeField] private AnimationClip walkClip;
+    [SerializeField] private string walkClipName = "mixamo.com";
 
-    private CharacterController characterController;
-    private float tempsRestant;
-    private float vitesseVerticale;
+    private float tempsEcoule;
+    private Animator animator;
+    private PlayableGraph walkGraph;
+    private AnimationClipPlayable walkPlayable;
+    private bool walkGraphReady;
 
-    void Awake()
+    private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
-        tempsRestant = dureeAvance;
-        InitialiserHitbox();
-    }
+        animator = GetComponent<Animator>();
 
-    void OnEnable()
-    {
-        tempsRestant = dureeAvance;
-        vitesseVerticale = 0f;
-        InitialiserHitbox();
-    }
-
-    void OnValidate()
-    {
-        InitialiserHitbox();
-    }
-
-    void Update()
-    {
-        bool estAuSol = characterController.isGrounded;
-
-        if (estAuSol && vitesseVerticale < 0f)
+        if (animator == null)
         {
-            vitesseVerticale = forceAuSol;
-        }
-        else
-        {
-            vitesseVerticale += gravite * Time.deltaTime;
+            animator = GetComponentInChildren<Animator>();
         }
 
-        Vector3 mouvement = Vector3.zero;
-
-        if (tempsRestant > 0f)
+        if (walkClip == null)
         {
-            mouvement += transform.forward * vitesse;
-            tempsRestant -= Time.deltaTime;
+            walkClip = FindWalkClipAtRuntime();
         }
 
-        mouvement.y = vitesseVerticale;
-        characterController.Move(mouvement * Time.deltaTime);
+        TryCreateWalkGraph();
+        tempsEcoule = 0f;
+        RestartWalkingAnimation();
     }
 
-    void InitialiserHitbox()
+    private void OnEnable()
     {
-        if (pnjHitbox != null)
+        tempsEcoule = 0f;
+        RestartWalkingAnimation();
+    }
+
+    private void Update()
+    {
+        bool isWalking = tempsEcoule < dureeAvance;
+
+        if (isWalking)
         {
-            pnjHitbox.DefinirCible(transform);
+            transform.Translate(Vector3.forward * vitesse * Time.deltaTime, Space.Self);
+            tempsEcoule += Time.deltaTime;
+        }
+
+        SetWalkingAnimationEnabled(isWalking);
+    }
+
+    private void OnDestroy()
+    {
+        if (walkGraph.IsValid())
+        {
+            walkGraph.Destroy();
         }
     }
+
+    private void TryCreateWalkGraph()
+    {
+        if (walkGraphReady || animator == null || walkClip == null)
+        {
+            return;
+        }
+
+        walkGraph = PlayableGraph.Create($"{name}_WalkGraph");
+        AnimationPlayableOutput output = AnimationPlayableOutput.Create(walkGraph, "Walk", animator);
+        walkPlayable = AnimationClipPlayable.Create(walkGraph, walkClip);
+        output.SetSourcePlayable(walkPlayable);
+        walkGraph.Play();
+        walkGraphReady = true;
+    }
+
+    private void SetWalkingAnimationEnabled(bool isWalking)
+    {
+        if (!walkGraphReady)
+        {
+            return;
+        }
+
+        walkPlayable.SetSpeed(isWalking ? 1f : 0f);
+    }
+
+    private void RestartWalkingAnimation()
+    {
+        if (!walkGraphReady)
+        {
+            return;
+        }
+
+        walkPlayable.SetTime(0d);
+        SetWalkingAnimationEnabled(dureeAvance > 0f);
+    }
+
+    private AnimationClip FindWalkClipAtRuntime()
+    {
+        AnimationClip[] clips = Resources.FindObjectsOfTypeAll<AnimationClip>();
+
+        foreach (AnimationClip clip in clips)
+        {
+            if (clip == null || clip.name != walkClipName)
+            {
+                continue;
+            }
+
+            if (clip.name.StartsWith("__preview__"))
+            {
+                continue;
+            }
+
+            return clip;
+        }
+
+        return null;
+    }
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (walkClip != null)
+        {
+            return;
+        }
+
+        Object[] assets = AssetDatabase.LoadAllAssetsAtPath("Assets/models/Walk With Briefcase.fbx");
+
+        foreach (Object asset in assets)
+        {
+            AnimationClip clip = asset as AnimationClip;
+
+            if (clip == null)
+            {
+                continue;
+            }
+
+            if (clip.name != walkClipName)
+            {
+                continue;
+            }
+
+            walkClip = clip;
+            EditorUtility.SetDirty(this);
+            return;
+        }
+    }
+#endif
 }
