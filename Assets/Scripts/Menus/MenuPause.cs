@@ -10,7 +10,7 @@ public class MenuPause : MonoBehaviour
         panelPause.SetActive(false);
         panelOption.SetActive(false);
     }
-//ouvrir et fermet les options
+//ouvrir et fermer les options
     public void OpenOptions(){
     Debug.Log("Open options");
     panelOption.SetActive(true);
@@ -20,6 +20,19 @@ public class MenuPause : MonoBehaviour
     Debug.Log("Close options");
     panelOption.SetActive(false);
     }
+
+//reprendre la partie (sans appuyer sur échap)
+    public void Resume(){
+    Debug.Log("Resume");
+    panelPause.SetActive(!panelPause.activeInHierarchy);
+    }
+
+//Quitter la partie
+    public void leave(){
+    Debug.Log("Quitter la partie");
+    //changement de scène à ajouter !
+    }
+
 
 
 
