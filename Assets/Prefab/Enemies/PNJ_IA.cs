@@ -8,53 +8,76 @@ using UnityEditor;
 
 public class PNJ_IA : MonoBehaviour
 {
-    [SerializeField] private float vitesse = 1f;
-    [SerializeField] private float dureeAvance = 1.5f;
-    [SerializeField] private AnimationClip walkClip;
-    [SerializeField] private string walkClipName = "mixamo.com";
+    [Header("Deplacement")]
+    [SerializeField] private float vitesse = 2f;
+    [SerializeField] private float vitesseRotation = 8f;
 
-    private float tempsEcoule;
-    private Animator animator;
+    // Chaque etape : direction + distance a parcourir
+    // Le PNJ avance de X unites dans la direction indiquee, puis passe a l'etape suivante
+    [System.Serializable]
+    public struct Etape
+    {
+        public Vector3 direction;
+        public float distance;
+    }
+
+    [SerializeField] private Etape[] etapes = new Etape[]
+    {
+        new Etape { direction = Vector3.forward,  distance = 3f },
+        new Etape { direction = -Vector3.right,   distance = 3f },
+        new Etape { direction = -Vector3.forward, distance = 3f },
+        new Etape { direction = Vector3.right,    distance = 3f },
+    };
+
+    [Header("Animation")]
+    [SerializeField] private AnimationClip walkClip;
+
+    private Rigidbody rb;
     private PlayableGraph walkGraph;
-    private AnimationClipPlayable walkPlayable;
-    private bool walkGraphReady;
+
+    private int indexEtape = 0;
+    private float distanceParcourue = 0f;
+    private Quaternion rotationCible;
+
+    // -------------------------------------------------------------------------
+    // Cycle de vie
+    // -------------------------------------------------------------------------
 
     private void Awake()
     {
-        animator = GetComponent<Animator>();
-
-        if (animator == null)
-        {
-            animator = GetComponentInChildren<Animator>();
-        }
-
-        if (walkClip == null)
-        {
-            walkClip = FindWalkClipAtRuntime();
-        }
-
+        ConfigurerPhysique();
         TryCreateWalkGraph();
-        tempsEcoule = 0f;
-        RestartWalkingAnimation();
+
+        rotationCible = Quaternion.LookRotation(etapes[indexEtape].direction, Vector3.up);
+        rb.MoveRotation(rotationCible);
     }
 
-    private void OnEnable()
+    private void FixedUpdate()
     {
-        tempsEcoule = 0f;
-        RestartWalkingAnimation();
-    }
+        Etape etapeActuelle = etapes[indexEtape];
 
-    private void Update()
-    {
-        bool isWalking = tempsEcoule < dureeAvance;
+        // Distance parcourue ce FixedUpdate
+        float deplacement = vitesse * Time.fixedDeltaTime;
+        distanceParcourue += deplacement;
 
-        if (isWalking)
+        // Si on a atteint ou depasse la distance cible, on passe a l'etape suivante
+        if (distanceParcourue >= etapeActuelle.distance)
         {
-            transform.Translate(Vector3.forward * vitesse * Time.deltaTime, Space.Self);
-            tempsEcoule += Time.deltaTime;
+            // On se place exactement a la fin de l'etape pour eviter la derive
+            float surplus = distanceParcourue - etapeActuelle.distance;
+            rb.MovePosition(rb.position + etapeActuelle.direction.normalized * (deplacement - surplus));
+
+            indexEtape = (indexEtape + 1) % etapes.Length;
+            distanceParcourue = surplus; // on repart avec le surplus dans la nouvelle direction
+
+            rotationCible = Quaternion.LookRotation(etapes[indexEtape].direction, Vector3.up);
         }
 
-        SetWalkingAnimationEnabled(isWalking);
+        // Rotation progressive
+        rb.MoveRotation(Quaternion.Slerp(rb.rotation, rotationCible, vitesseRotation * Time.fixedDeltaTime));
+
+        // Deplacement dans la direction de l'etape courante (pas transform.forward pour eviter la derive pendant la rotation)
+        rb.MovePosition(rb.position + etapes[indexEtape].direction.normalized * vitesse * Time.fixedDeltaTime);
     }
 
     private void OnDestroy()
@@ -65,63 +88,51 @@ public class PNJ_IA : MonoBehaviour
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Physique
+    // -------------------------------------------------------------------------
+
+    private void ConfigurerPhysique()
+    {
+        rb = GetComponent<Rigidbody>();
+
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+        }
+
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX
+                       | RigidbodyConstraints.FreezeRotationZ;
+    }
+
+    // -------------------------------------------------------------------------
+    // Animation
+    // -------------------------------------------------------------------------
+
     private void TryCreateWalkGraph()
     {
-        if (walkGraphReady || animator == null || walkClip == null)
+        Animator animator = GetComponent<Animator>();
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        if (animator == null || walkClip == null)
         {
             return;
         }
 
         walkGraph = PlayableGraph.Create($"{name}_WalkGraph");
         AnimationPlayableOutput output = AnimationPlayableOutput.Create(walkGraph, "Walk", animator);
-        walkPlayable = AnimationClipPlayable.Create(walkGraph, walkClip);
+        AnimationClipPlayable walkPlayable = AnimationClipPlayable.Create(walkGraph, walkClip);
         output.SetSourcePlayable(walkPlayable);
         walkGraph.Play();
-        walkGraphReady = true;
     }
 
-    private void SetWalkingAnimationEnabled(bool isWalking)
-    {
-        if (!walkGraphReady)
-        {
-            return;
-        }
-
-        walkPlayable.SetSpeed(isWalking ? 1f : 0f);
-    }
-
-    private void RestartWalkingAnimation()
-    {
-        if (!walkGraphReady)
-        {
-            return;
-        }
-
-        walkPlayable.SetTime(0d);
-        SetWalkingAnimationEnabled(dureeAvance > 0f);
-    }
-
-    private AnimationClip FindWalkClipAtRuntime()
-    {
-        AnimationClip[] clips = Resources.FindObjectsOfTypeAll<AnimationClip>();
-
-        foreach (AnimationClip clip in clips)
-        {
-            if (clip == null || clip.name != walkClipName)
-            {
-                continue;
-            }
-
-            if (clip.name.StartsWith("__preview__"))
-            {
-                continue;
-            }
-
-            return clip;
-        }
-
-        return null;
-    }
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -130,25 +141,26 @@ public class PNJ_IA : MonoBehaviour
             return;
         }
 
-        Object[] assets = AssetDatabase.LoadAllAssetsAtPath("Assets/models/Walk With Briefcase.fbx");
+        string[] guids = AssetDatabase.FindAssets("t:AnimationClip", new[] { "Assets/models" });
 
-        foreach (Object asset in assets)
+        foreach (string guid in guids)
         {
-            AnimationClip clip = asset as AnimationClip;
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            Object[] assets = AssetDatabase.LoadAllAssetsAtPath(path);
 
-            if (clip == null)
+            foreach (Object asset in assets)
             {
-                continue;
-            }
+                AnimationClip clip = asset as AnimationClip;
 
-            if (clip.name != walkClipName)
-            {
-                continue;
-            }
+                if (clip == null || clip.name.StartsWith("__preview__"))
+                {
+                    continue;
+                }
 
-            walkClip = clip;
-            EditorUtility.SetDirty(this);
-            return;
+                walkClip = clip;
+                EditorUtility.SetDirty(this);
+                return;
+            }
         }
     }
 #endif
