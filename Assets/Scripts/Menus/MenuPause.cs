@@ -15,6 +15,7 @@ public class MenuPause : MonoBehaviour
         {
             Debug.Log("menu pause");
             panelPause.SetActive(!panelPause.activeInHierarchy);
+            //à ajouter : faire pause sur le gameplay, le timer, etc 
         }
     }
 }

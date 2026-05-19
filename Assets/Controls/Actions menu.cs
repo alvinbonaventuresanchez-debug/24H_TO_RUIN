@@ -85,15 +85,48 @@ public partial class @Actionsmenu: IInputActionCollection2, IDisposable
     public @Actionsmenu()
     {
         asset = InputActionAsset.FromJson(@"{
-    ""version"": 0,
+    ""version"": 1,
     ""name"": ""Actions menu"",
-    ""maps"": [],
+    ""maps"": [
+        {
+            ""name"": ""menu pause"",
+            ""id"": ""6bda7b2f-51de-4636-bbcd-c97a7525abd8"",
+            ""actions"": [
+                {
+                    ""name"": ""New action"",
+                    ""type"": ""Value"",
+                    ""id"": ""f82a156f-db55-4c17-bd36-2eb0729ca294"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""db86543a-c69e-4ff4-9f5e-381955c2daf9"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        }
+    ],
     ""controlSchemes"": []
 }");
+        // menu pause
+        m_menupause = asset.FindActionMap("menu pause", throwIfNotFound: true);
+        m_menupause_Newaction = m_menupause.FindAction("New action", throwIfNotFound: true);
     }
 
     ~@Actionsmenu()
     {
+        UnityEngine.Debug.Assert(!m_menupause.enabled, "This will cause a leak and performance issues, Actionsmenu.menupause.Disable() has not been called.");
     }
 
     /// <summary>
@@ -164,5 +197,116 @@ public partial class @Actionsmenu: IInputActionCollection2, IDisposable
     public int FindBinding(InputBinding bindingMask, out InputAction action)
     {
         return asset.FindBinding(bindingMask, out action);
+    }
+
+    // menu pause
+    private readonly InputActionMap m_menupause;
+    private List<IMenupauseActions> m_MenupauseActionsCallbackInterfaces = new List<IMenupauseActions>();
+    private readonly InputAction m_menupause_Newaction;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "menu pause".
+    /// </summary>
+    public struct MenupauseActions
+    {
+        private @Actionsmenu m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public MenupauseActions(@Actionsmenu wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "menupause/Newaction".
+        /// </summary>
+        public InputAction @Newaction => m_Wrapper.m_menupause_Newaction;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_menupause; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="MenupauseActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(MenupauseActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="MenupauseActions" />
+        public void AddCallbacks(IMenupauseActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MenupauseActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MenupauseActionsCallbackInterfaces.Add(instance);
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="MenupauseActions" />
+        private void UnregisterCallbacks(IMenupauseActions instance)
+        {
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="MenupauseActions.UnregisterCallbacks(IMenupauseActions)" />.
+        /// </summary>
+        /// <seealso cref="MenupauseActions.UnregisterCallbacks(IMenupauseActions)" />
+        public void RemoveCallbacks(IMenupauseActions instance)
+        {
+            if (m_Wrapper.m_MenupauseActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="MenupauseActions.AddCallbacks(IMenupauseActions)" />
+        /// <seealso cref="MenupauseActions.RemoveCallbacks(IMenupauseActions)" />
+        /// <seealso cref="MenupauseActions.UnregisterCallbacks(IMenupauseActions)" />
+        public void SetCallbacks(IMenupauseActions instance)
+        {
+            foreach (var item in m_Wrapper.m_MenupauseActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_MenupauseActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="MenupauseActions" /> instance referencing this action map.
+    /// </summary>
+    public MenupauseActions @menupause => new MenupauseActions(this);
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "menu pause" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="MenupauseActions.AddCallbacks(IMenupauseActions)" />
+    /// <seealso cref="MenupauseActions.RemoveCallbacks(IMenupauseActions)" />
+    public interface IMenupauseActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "New action" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNewaction(InputAction.CallbackContext context);
     }
 }
