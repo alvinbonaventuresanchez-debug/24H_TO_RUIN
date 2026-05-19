@@ -1,19 +1,23 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.TextCore.LowLevel;
+using UnityEngine.SceneManagement;
 
 public class GameTimer : MonoBehaviour
 {
     public float tempsRestant = 720f;
     public TextMeshProUGUI timerText;
     [SerializeField] private Font timerFontSource;
+    [SerializeField] private string timeoutSceneName = "Defeat";
 
     private TMP_FontAsset timerFontAsset;
     private Font appliedFontSource;
+    private bool hasTimerEnded;
 
     void Awake()
     {
         ApplyTimerFont();
+        UpdateTimerDisplay();
     }
 
     void OnValidate()
@@ -23,6 +27,11 @@ public class GameTimer : MonoBehaviour
 
     void Update()
     {
+        if (hasTimerEnded)
+        {
+            return;
+        }
+
         if (tempsRestant > 0)
         {
             tempsRestant -= Time.deltaTime;
@@ -32,14 +41,35 @@ public class GameTimer : MonoBehaviour
                 tempsRestant = 0;
             }
 
-            int minutes = Mathf.FloorToInt(tempsRestant / 60);
-            int secondes = Mathf.FloorToInt(tempsRestant % 60);
+            UpdateTimerDisplay();
 
-            if (timerText != null)
+            if (tempsRestant <= 0)
             {
-                timerText.text = string.Format("{0:00}:{1:00}", minutes, secondes);
+                EndGameOnTimeout();
             }
         }
+    }
+
+    void UpdateTimerDisplay()
+    {
+        int minutes = Mathf.FloorToInt(tempsRestant / 60);
+        int secondes = Mathf.FloorToInt(tempsRestant % 60);
+
+        if (timerText != null)
+        {
+            timerText.text = string.Format("{0:00}:{1:00}", minutes, secondes);
+        }
+    }
+
+    void EndGameOnTimeout()
+    {
+        hasTimerEnded = true;
+        Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+
+        string sceneToLoad = string.IsNullOrWhiteSpace(timeoutSceneName) ? "Defeat" : timeoutSceneName;
+        SceneManager.LoadScene(sceneToLoad);
     }
 
     void ApplyTimerFont()
