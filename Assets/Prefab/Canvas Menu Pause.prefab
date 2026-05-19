@@ -652,7 +652,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1057217641882708052}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7491068782414209594}
+        m_TargetAssemblyTypeName: MenuPause, Assembly-CSharp
+        m_MethodName: OpenOptions
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5493926553795613140
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,6 +783,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuPause
   panelPause: {fileID: 7993016828266623063}
+  panelOption: {fileID: 5611351316458524634}
 --- !u!1 &5629550711499185864
 GameObject:
   m_ObjectHideFlags: 0
@@ -1120,6 +1133,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Panel Options
       objectReference: {fileID: 0}
+    - target: {fileID: 1019640839077524091, guid: cc033833316ff431b8eb0e42a3b7fc56, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6243211363597597684, guid: cc033833316ff431b8eb0e42a3b7fc56, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1224,5 +1241,10 @@ PrefabInstance:
 --- !u!224 &1539575842487043669 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6243211363597597684, guid: cc033833316ff431b8eb0e42a3b7fc56, type: 3}
+  m_PrefabInstance: {fileID: 4898222846508809633}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5611351316458524634 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1019640839077524091, guid: cc033833316ff431b8eb0e42a3b7fc56, type: 3}
   m_PrefabInstance: {fileID: 4898222846508809633}
   m_PrefabAsset: {fileID: 0}
