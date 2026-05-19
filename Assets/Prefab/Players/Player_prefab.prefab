@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bc00c1c0d76449391a16aa0a6a6e6d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FreeCameraController
-  moveSpeed: 4.5
+  moveSpeed: 3.5
   sprintMultiplier: 1.7
   lookSensitivity: 0.12
   maxPitch: 80
@@ -54,6 +54,8 @@ MonoBehaviour:
   cameraTransform: {fileID: 1897655255096206977}
   gravity: -20
   groundedForce: -2
+  jumpHeight: 0.5
+  sixEasterEggClip: {fileID: 8300000, guid: d968cfad168a4fd8b5aac5a74944b1be, type: 3}
 --- !u!143 &1057137949883113845
 CharacterController:
   m_ObjectHideFlags: 0

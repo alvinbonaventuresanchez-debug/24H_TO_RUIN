@@ -425,21 +425,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 362630265703773987, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d7e85d125310244498af72293213089e, type: 2}
     - target: {fileID: 2060894895047546958, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_Name
       value: Player_prefab
       objectReference: {fileID: 0}
+    - target: {fileID: 2941705109941201329, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d7e85d125310244498af72293213089e, type: 2}
     - target: {fileID: 3252273727882088804, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.13
+      value: 0.27
       objectReference: {fileID: 0}
     - target: {fileID: 3252273727882088804, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.13
+      value: 0.27
       objectReference: {fileID: 0}
     - target: {fileID: 3252273727882088804, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.13
+      value: 0.27
       objectReference: {fileID: 0}
     - target: {fileID: 3252273727882088804, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_LocalPosition.x
@@ -484,6 +492,14 @@ PrefabInstance:
     - target: {fileID: 3252273727882088804, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3806605374892425815, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
+      propertyPath: moveSpeed
+      value: 3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3806605374892425815, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
+      propertyPath: jumpHeight
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6327361234579510684, guid: 276b37efa6b963d438d845233aaf2811, type: 3}
       propertyPath: m_ConstrainProportionsScale
