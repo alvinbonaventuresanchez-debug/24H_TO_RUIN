@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "Actions menu",
+    "maps": [
+        {
+            "name": "menu pause",
+            "id": "6bda7b2f-51de-4636-bbcd-c97a7525abd8",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Value",
+                    "id": "f82a156f-db55-4c17-bd36-2eb0729ca294",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "db86543a-c69e-4ff4-9f5e-381955c2daf9",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
