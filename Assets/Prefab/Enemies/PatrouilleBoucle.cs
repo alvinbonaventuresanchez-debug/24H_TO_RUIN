@@ -27,13 +27,8 @@ public class PatrouilleBoucle : MonoBehaviour
         {
             agent.SetDestination(waypoints[indexCourant].position);
             demarre = true;
-            Debug.Log("Destination definie : " + waypoints[indexCourant].position);
             return;
         }
-
-        Debug.Log("isOnNavMesh: " + agent.isOnNavMesh
-            + " | remaining: " + agent.remainingDistance
-            + " | velocity: " + agent.velocity);
 
         if (!agent.pathPending && agent.remainingDistance <= seuilArrivee)
         {
