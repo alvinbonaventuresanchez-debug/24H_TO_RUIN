@@ -10,15 +10,21 @@ public class FreeCameraController : MonoBehaviour
     [SerializeField] private float maxPitch = 80f;
     [SerializeField] private bool lockCursorOnStart = true;
     [SerializeField] private Transform cameraTransform;
+    [SerializeField] private float gravity = -20f;
+    [SerializeField] private float groundedForce = -2f;
 
     private float yaw;
     private float pitch;
+    private float verticalVelocity;
+    private CharacterController characterController;
 
     public float MovementBlend { get; private set; }
     public float SprintBlend { get; private set; }
 
     private void Awake()
     {
+        characterController = GetComponent<CharacterController>();
+
         if (cameraTransform == null)
         {
             Camera childCamera = GetComponentInChildren<Camera>();
@@ -128,11 +134,28 @@ public class FreeCameraController : MonoBehaviour
             input.Normalize();
         }
 
-        Vector3 movement = (transform.forward * input.y) + (transform.right * input.x);
-        movement.y = 0f;
-
         float currentMoveSpeed = moveSpeed * Mathf.Lerp(1f, sprintMultiplier, SprintBlend);
-        transform.position += movement * currentMoveSpeed * Time.deltaTime;
+        Vector3 horizontalMovement = (transform.forward * input.y) + (transform.right * input.x);
+        horizontalMovement.y = 0f;
+
+        if (characterController != null)
+        {
+            if (characterController.isGrounded && verticalVelocity < 0f)
+            {
+                verticalVelocity = groundedForce;
+            }
+            else
+            {
+                verticalVelocity += gravity * Time.deltaTime;
+            }
+
+            Vector3 movement = horizontalMovement * currentMoveSpeed;
+            movement.y = verticalVelocity;
+            characterController.Move(movement * Time.deltaTime);
+            return;
+        }
+
+        transform.position += horizontalMovement * currentMoveSpeed * Time.deltaTime;
     }
 
     private void ApplyLookRotation()
