@@ -5,25 +5,27 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] private GameObject panel_options;
+	public GameObject panelOption;
 	
 	void Start(){
-		UnshowOptions();
+		panelOption.SetActive(false);
 	}
 	
 	public void PlayGame(){
+		Debug.Log("Lancer la partie");
 		SceneManager.LoadScene("Level1");
 	}
 	
-	public void ShowOptions(){
-		panel_options.SetActive(true);
+	public void OpenOptions(){
+		panelOption.SetActive(true);
 	}
 	
-	public void UnshowOptions(){
-		panel_options.SetActive(false);
+	public void CloseOptions(){
+		panelOption.SetActive(false);
 	}
 	
 	public void QuitGame(){
+		Debug.Log("Quitter le jeu");
 		Application.Quit();
 	}
 }
