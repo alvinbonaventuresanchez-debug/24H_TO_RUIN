@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class InteractionCadre : MonoBehaviour
 {
     [Header("Interaction")]
@@ -12,9 +13,14 @@ public class InteractionCadre : MonoBehaviour
     private Rigidbody rb;
     private bool estTombe = false;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        TrouverJoueurSiNecessaire();
+    }
+
+    void Start()
+    {
         if (indicateurE != null)
             indicateurE.SetActive(false);
     }
@@ -22,6 +28,12 @@ public class InteractionCadre : MonoBehaviour
     void Update()
     {
         if (estTombe) return;
+        if (!TrouverJoueurSiNecessaire())
+        {
+            if (indicateurE != null)
+                indicateurE.SetActive(false);
+            return;
+        }
 
         float distance = Vector3.Distance(transform.position, joueur.position);
         bool assezProche = distance <= distanceInteraction;
@@ -40,11 +52,26 @@ public class InteractionCadre : MonoBehaviour
 
     void FaireTomber()
     {
+        if (rb == null) return;
+
         rb.isKinematic = false;
         rb.AddForce(Vector3.forward * 2f, ForceMode.Impulse);
         estTombe = true;
 
         if (indicateurE != null)
             indicateurE.SetActive(false);
+    }
+
+    bool TrouverJoueurSiNecessaire()
+    {
+        if (joueur != null)
+            return true;
+
+        GameObject playerObj = GameObject.FindWithTag("Player");
+        if (playerObj == null)
+            return false;
+
+        joueur = playerObj.transform;
+        return true;
     }
 }
