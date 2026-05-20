@@ -27,10 +27,13 @@ public class ConeDetection : MonoBehaviour
     {
         bool voit = JoueurDetecte();
 
-        if (voit && !voyaitJoueur)
-            JaugeDetection.Instance.SignalerDetection(true);
-        else if (!voit && voyaitJoueur)
-            JaugeDetection.Instance.SignalerDetection(false);
+        if (JaugeDetection.Instance != null)
+        {
+            if (voit && !voyaitJoueur)
+                JaugeDetection.Instance.SignalerDetection(true);
+            else if (!voit && voyaitJoueur)
+                JaugeDetection.Instance.SignalerDetection(false);
+        }
 
         voyaitJoueur = voit;
     }
