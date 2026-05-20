@@ -1,0 +1,68 @@
+using UnityEngine;
+
+public class ConeDetection : MonoBehaviour
+{
+    [Header("Cone de vision")]
+    public float distance = 5f;
+    public float angle = 45f;
+    public Transform joueur;
+
+    private bool voyaitJoueur = false;
+    private float angleOriginal;
+
+    void Start()
+    {
+        angleOriginal = angle;
+    }
+
+    public void SetModeAlerte(bool actif)
+    {
+        angle = actif ? 180f : angleOriginal;
+    }
+
+    void Update()
+    {
+        bool voit = JoueurDetecte();
+
+        if (voit && !voyaitJoueur)
+            JaugeDetection.Instance.SignalerDetection(true);
+        else if (!voit && voyaitJoueur)
+            JaugeDetection.Instance.SignalerDetection(false);
+
+        voyaitJoueur = voit;
+    }
+
+    bool JoueurDetecte()
+    {
+        if (joueur == null) return false;
+
+        Vector3 direction = joueur.position - transform.position;
+
+        // Verifie la distance
+        if (direction.magnitude > distance) return false;
+
+        // Verifie l'angle
+        float angleDiff = Vector3.Angle(transform.forward, direction);
+        if (angleDiff > angle / 2f) return false;
+
+        // Verifie qu'il n'y a pas de mur entre le PNJ et le joueur
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, direction.normalized, out hit, distance))
+        {
+            if (!hit.transform.CompareTag("Player"))
+                return false;
+        }
+
+        return true;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = voyaitJoueur ? Color.red : Color.yellow;
+        Vector3 rayonGauche = Quaternion.Euler(0, -angle / 2f, 0) * transform.forward;
+        Vector3 rayonDroit = Quaternion.Euler(0, angle / 2f, 0) * transform.forward;
+        Gizmos.DrawRay(transform.position, rayonGauche * distance);
+        Gizmos.DrawRay(transform.position, rayonDroit * distance);
+        Gizmos.DrawWireSphere(transform.position, distance);
+    }
+}

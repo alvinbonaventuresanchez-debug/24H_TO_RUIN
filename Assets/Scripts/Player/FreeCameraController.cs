@@ -18,6 +18,9 @@ public class FreeCameraController : MonoBehaviour
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundedForce = -2f;
     [SerializeField] private float jumpHeight = 0.5f;
+    [Header("Vol")]
+    [SerializeField] private float flightSpeed = 4f;
+    [SerializeField] private float flightDoubleTapDelay = 0.25f;
     [Header("SIX Easter Egg")]
     [SerializeField] private bool enableSixEasterEgg = true;
     [SerializeField] private float easterEggDuration = 6.7f;
@@ -44,6 +47,10 @@ public class FreeCameraController : MonoBehaviour
     private float yaw;
     private float pitch;
     private float verticalVelocity;
+    // VOL : indique si le joueur est en train de voler.
+    private bool isFlying;
+    // VOL : memorise le moment du dernier appui sur Espace pour detecter le double appui.
+    private float lastSpacePressTime = -10f;
     private CharacterController characterController;
     private AudioSource sixEasterEggAudioSource;
     private int easterEggSequenceIndex;
@@ -185,9 +192,34 @@ public class FreeCameraController : MonoBehaviour
         float currentMoveSpeed = moveSpeed * Mathf.Lerp(1f, sprintMultiplier, SprintBlend);
         Vector3 horizontalMovement = (transform.forward * input.y) + (transform.right * input.x);
         horizontalMovement.y = 0f;
+        // VOL : detecte un double appui rapide sur Espace pour activer ou couper le vol.
+        bool flightToggledThisFrame = HandleFlightToggle();
 
         if (characterController != null)
         {
+            if (isFlying)
+            {
+                // VOL : pendant le vol, la gravite est coupee.
+                verticalVelocity = 0f;
+
+                // VOL : maintenir Espace fait monter le joueur.
+                if (IsFlightUpPressed())
+                {
+                    verticalVelocity += flightSpeed;
+                }
+
+                // VOL : maintenir Tab fait descendre le joueur.
+                if (IsFlightDownPressed())
+                {
+                    verticalVelocity -= flightSpeed;
+                }
+
+                Vector3 flyingMovement = horizontalMovement * currentMoveSpeed;
+                flyingMovement.y = verticalVelocity;
+                characterController.Move(flyingMovement * Time.deltaTime);
+                return;
+            }
+
             bool isGrounded = characterController.isGrounded;
 
             if (isGrounded && verticalVelocity < 0f)
@@ -195,7 +227,7 @@ public class FreeCameraController : MonoBehaviour
                 verticalVelocity = groundedForce;
             }
 
-            if (isGrounded && WasJumpPressed())
+            if (!flightToggledThisFrame && isGrounded && WasJumpPressed())
             {
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
@@ -210,7 +242,27 @@ public class FreeCameraController : MonoBehaviour
             return;
         }
 
-        transform.position += horizontalMovement * currentMoveSpeed * Time.deltaTime;
+        if (isFlying)
+        {
+            // VOL : meme sans CharacterController, Espace fait monter et Tab fait descendre.
+            float flightVerticalMovement = 0f;
+
+            if (IsFlightUpPressed())
+            {
+                flightVerticalMovement += flightSpeed;
+            }
+
+            if (IsFlightDownPressed())
+            {
+                flightVerticalMovement -= flightSpeed;
+            }
+
+            horizontalMovement.y = flightVerticalMovement;
+        }
+
+        Vector3 fallbackMovement = horizontalMovement * currentMoveSpeed;
+        fallbackMovement.y = horizontalMovement.y;
+        transform.position += fallbackMovement * Time.deltaTime;
     }
 
     private void ApplyLookRotation()
@@ -540,6 +592,43 @@ public class FreeCameraController : MonoBehaviour
     {
         return IsPressed(Keyboard.current.leftShiftKey)
             || IsPressed(Keyboard.current.rightShiftKey);
+    }
+
+    private bool HandleFlightToggle()
+    {
+        if (!WasJumpPressed())
+        {
+            return false;
+        }
+
+        float currentTime = Time.time;
+
+        // VOL : si Espace est presse deux fois tres vite, on active ou on coupe le vol.
+        if (currentTime - lastSpacePressTime <= flightDoubleTapDelay)
+        {
+            isFlying = !isFlying;
+
+            // VOL : on remet la vitesse verticale a zero pour demarrer ou couper le vol proprement.
+            verticalVelocity = 0f;
+            lastSpacePressTime = -10f;
+            return true;
+        }
+
+        // VOL : premier appui sur Espace, on attend un second appui rapide.
+        lastSpacePressTime = currentTime;
+        return false;
+    }
+
+    private bool IsFlightUpPressed()
+    {
+        // VOL : Espace maintenu sert a monter pendant le vol.
+        return IsPressed(Keyboard.current.spaceKey);
+    }
+
+    private bool IsFlightDownPressed()
+    {
+        // VOL : Tab maintenu sert a descendre pendant le vol.
+        return IsPressed(Keyboard.current.tabKey);
     }
 
     private bool WasJumpPressed()
