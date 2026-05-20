@@ -37,10 +37,21 @@ public class ConeDetection : MonoBehaviour
         if (joueur == null) return false;
 
         Vector3 direction = joueur.position - transform.position;
+
+        // Verifie la distance
         if (direction.magnitude > distance) return false;
 
+        // Verifie l'angle
         float angleDiff = Vector3.Angle(transform.forward, direction);
         if (angleDiff > angle / 2f) return false;
+
+        // Verifie qu'il n'y a pas de mur entre le PNJ et le joueur
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, direction.normalized, out hit, distance))
+        {
+            if (!hit.transform.CompareTag("Player"))
+                return false;
+        }
 
         return true;
     }
