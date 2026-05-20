@@ -12,7 +12,7 @@ public class Doors : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && active)
+        if ((other.CompareTag("Player") || other.CompareTag("PNJ")) && active)
         {
             Open();
         }
@@ -20,7 +20,7 @@ public class Doors : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player") && active)
+        if ((other.CompareTag("Player") || other.CompareTag("PNJ")) && active)
         {
             Close();
         }
