@@ -4,10 +4,21 @@ public class ConeDetection : MonoBehaviour
 {
     [Header("Cone de vision")]
     public float distance = 5f;
-    public float angle = 90f;
+    public float angle = 45f;
     public Transform joueur;
 
     private bool voyaitJoueur = false;
+    private float angleOriginal;
+
+    void Start()
+    {
+        angleOriginal = angle;
+    }
+
+    public void SetModeAlerte(bool actif)
+    {
+        angle = actif ? 180f : angleOriginal;
+    }
 
     void Update()
     {

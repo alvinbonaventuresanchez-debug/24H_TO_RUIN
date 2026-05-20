@@ -9,9 +9,14 @@ public class PatrouilleBoucle : MonoBehaviour
     [Header("Distance pour passer au waypoint suivant")]
     public float seuilArrivee = 0.5f;
 
+    [Header("Attraction joueur")]
+    public Transform joueur;
+    public float seuilArriveeJoueur = 1f;
+
     private NavMeshAgent agent;
     private int indexCourant = 0;
     private bool demarre = false;
+    private bool attireParJoueur = false;
 
     void Start()
     {
@@ -30,11 +35,27 @@ public class PatrouilleBoucle : MonoBehaviour
             return;
         }
 
+        // Mode attraction : suit le joueur en continu
+        if (attireParJoueur)
+        {
+            agent.SetDestination(joueur.position);
+            return;
+        }
+
+        // Patrouille normale
         if (!agent.pathPending && agent.remainingDistance <= seuilArrivee)
         {
             PasserWaypointSuivant();
-            return;
         }
+    }
+
+    public void AttirerVersJoueur(bool actif)
+    {
+        if (joueur == null) return;
+        attireParJoueur = actif;
+
+        if (!actif)
+            PasserWaypointSuivant();
     }
 
     void PasserWaypointSuivant()
