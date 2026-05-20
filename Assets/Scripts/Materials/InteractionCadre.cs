@@ -6,23 +6,32 @@ public class InteractionCadre : MonoBehaviour
     public float distanceInteraction = 2f;
     public Transform joueur;
 
+    [Header("UI")]
+    public GameObject indicateurE;
+
     private Rigidbody rb;
     private bool estTombe = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        if (indicateurE != null)
+            indicateurE.SetActive(false);
     }
 
     void Update()
     {
         if (estTombe) return;
 
-        // Verifie que le joueur est assez proche
         float distance = Vector3.Distance(transform.position, joueur.position);
-        if (distance > distanceInteraction) return;
+        bool assezProche = distance <= distanceInteraction;
 
-        // Verifie que le joueur appuie sur E
+        // Affiche ou cache l'indicateur
+        if (indicateurE != null)
+            indicateurE.SetActive(assezProche);
+
+        if (!assezProche) return;
+
         if (Input.GetKeyDown(KeyCode.E))
         {
             FaireTomber();
@@ -31,12 +40,11 @@ public class InteractionCadre : MonoBehaviour
 
     void FaireTomber()
     {
-        // Desactive Is Kinematic pour que la gravite prenne effet
         rb.isKinematic = false;
-
-        // Donne une petite impulsion pour simuler le decrochage
         rb.AddForce(Vector3.forward * 2f, ForceMode.Impulse);
-
         estTombe = true;
+
+        if (indicateurE != null)
+            indicateurE.SetActive(false);
     }
 }

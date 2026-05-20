@@ -9,15 +9,18 @@ public class ConeDetection : MonoBehaviour
 
     private bool voyaitJoueur = false;
     private float angleOriginal;
+    private float distanceOriginale;
 
     void Start()
     {
         angleOriginal = angle;
+        distanceOriginale = distance;
     }
 
     public void SetModeAlerte(bool actif)
     {
         angle = actif ? 180f : angleOriginal;
+        distance = actif ? distanceOriginale * 2f : distanceOriginale;
     }
 
     void Update()
@@ -36,18 +39,22 @@ public class ConeDetection : MonoBehaviour
     {
         if (joueur == null) return false;
 
-        Vector3 direction = joueur.position - transform.position;
+        Vector3 monPosition = transform.position;
+        Vector3 posJoueur = joueur.position;
 
-        // Verifie la distance
-        if (direction.magnitude > distance) return false;
+        Vector3 direction = posJoueur - monPosition;
+        float dist = direction.magnitude;
+        if (dist > distance) return false;
 
-        // Verifie l'angle
-        float angleDiff = Vector3.Angle(transform.forward, direction);
+        Transform reference = transform.parent != null ? transform.parent : transform;
+        float angleDiff = Vector3.Angle(reference.forward, direction);
         if (angleDiff > angle / 2f) return false;
 
-        // Verifie qu'il n'y a pas de mur entre le PNJ et le joueur
+        // Ignore le layer PNJ pour ne pas se detecter soi-meme.
+        int layerMask = ~LayerMask.GetMask("PNJ");
+
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, direction.normalized, out hit, distance))
+        if (Physics.Raycast(monPosition, direction.normalized, out hit, distance, layerMask))
         {
             if (!hit.transform.CompareTag("Player"))
                 return false;
@@ -58,9 +65,10 @@ public class ConeDetection : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        Transform reference = transform.parent != null ? transform.parent : transform;
         Gizmos.color = voyaitJoueur ? Color.red : Color.yellow;
-        Vector3 rayonGauche = Quaternion.Euler(0, -angle / 2f, 0) * transform.forward;
-        Vector3 rayonDroit = Quaternion.Euler(0, angle / 2f, 0) * transform.forward;
+        Vector3 rayonGauche = Quaternion.Euler(0, -angle / 2f, 0) * reference.forward;
+        Vector3 rayonDroit = Quaternion.Euler(0, angle / 2f, 0) * reference.forward;
         Gizmos.DrawRay(transform.position, rayonGauche * distance);
         Gizmos.DrawRay(transform.position, rayonDroit * distance);
         Gizmos.DrawWireSphere(transform.position, distance);

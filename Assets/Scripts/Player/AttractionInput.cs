@@ -15,7 +15,6 @@ public class AttractionInput : MonoBehaviour
                 if (cone != null)
                 {
                     cone.SetModeAlerte(true);
-                    cone.distance = 4f;
                 }
             }
         }
@@ -29,7 +28,6 @@ public class AttractionInput : MonoBehaviour
                 if (cone != null)
                 {
                     cone.SetModeAlerte(false);
-                    cone.distance = 2f;
                 }
             }
         }
