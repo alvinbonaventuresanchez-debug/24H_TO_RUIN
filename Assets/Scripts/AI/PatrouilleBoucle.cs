@@ -21,6 +21,10 @@ public class PatrouilleBoucle : MonoBehaviour
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        
+        GameObject playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null && joueur == null)
+            joueur = playerObj.transform;
     }
 
     void Update()
@@ -38,7 +42,8 @@ public class PatrouilleBoucle : MonoBehaviour
         // Mode attraction : suit le joueur en continu
         if (attireParJoueur)
         {
-            agent.SetDestination(joueur.position);
+            if (joueur != null)
+                agent.SetDestination(joueur.position);
             return;
         }
 
@@ -62,5 +67,23 @@ public class PatrouilleBoucle : MonoBehaviour
     {
         indexCourant = (indexCourant + 1) % waypoints.Length;
         agent.SetDestination(waypoints[indexCourant].position);
+    }
+
+    /// <summary>
+    /// Arrête la patrouille automatique (appelé par PNJ_Investigation)
+    /// </summary>
+    public void StopPatrol()
+    {
+        demarre = false;
+        if (agent != null)
+            agent.ResetPath();
+    }
+
+    /// <summary>
+    /// Reprend la patrouille (appelé par PNJ_Investigation)
+    /// </summary>
+    public void ResumePatrol()
+    {
+        demarre = false;
     }
 }
