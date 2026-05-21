@@ -24,8 +24,8 @@ public class MenuPause : MonoBehaviour
 
 //reprendre la partie (sans appuyer sur échap)
     public void Resume(){
-    Debug.Log("Resume");
-    panelPause.SetActive(!panelPause.activeInHierarchy);
+        Debug.Log("Resume");
+        OpenPause(!panelPause.activeInHierarchy);
     }
 
 //Quitter la partie
@@ -44,8 +44,16 @@ public class MenuPause : MonoBehaviour
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             Debug.Log("menu pause");
-            panelPause.SetActive(!panelPause.activeInHierarchy);
+            bool newState = !panelPause.activeInHierarchy;
+            OpenPause(newState);
             //à ajouter : faire pause sur le gameplay, le timer, etc 
         }
+    }
+
+    void OpenPause(bool newState)
+    {
+            Cursor.lockState = newState ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = newState;
+            panelPause.SetActive(newState);
     }
 }

@@ -112,24 +112,10 @@ public class FreeCameraController : MonoBehaviour
 
     private void Update()
     {
-        HandleCursorState();
         HandleSixEasterEggInput();
         HandleLook();
         HandleMovement();
         UpdateSixEasterEggAnimation();
-    }
-
-    private void HandleCursorState()
-    {
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            UnlockCursor();
-        }
-
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            LockCursor();
-        }
     }
 
     private void HandleLook()
