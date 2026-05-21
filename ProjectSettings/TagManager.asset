@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - PNJ
+  - objet
   layers:
   - Default
   - TransparentFX

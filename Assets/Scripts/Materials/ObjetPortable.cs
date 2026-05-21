@@ -7,6 +7,9 @@ public class ObjetPortable : MonoBehaviour
     public Vector3 offsetPosition = new Vector3(0f, -0.16f, 0.31f);
     public float distanceInteraction = 2f;
 
+    [Header("Indicateur interaction")]
+    [SerializeField] private GameObject boutonE; // Glisser le BoutonE ici dans l'Inspector
+
     private static readonly System.Collections.Generic.List<ObjetPortable> objetsPortables = new System.Collections.Generic.List<ObjetPortable>();
     private static ObjetPortable objetPorteActuel;
     private static int frameDerniereInteraction = -1;
@@ -40,13 +43,16 @@ public class ObjetPortable : MonoBehaviour
             return;
         }
 
-        // Cherche le joueur automatiquement
         joueur = playerObj.transform;
         collidersJoueur = playerObj.GetComponentsInChildren<Collider>(true);
         IgnorerCollisionAvecJoueur(true);
         collidersObstacle = TrouverCollidersObstacle();
 
         cam = Camera.main;
+
+        // S'assurer que le bouton est caché au départ
+        if (boutonE != null)
+            boutonE.SetActive(false);
     }
 
     void Update()
@@ -59,12 +65,29 @@ public class ObjetPortable : MonoBehaviour
 
         if (estPorte)
             SuivreLaCamera();
+
+        MettreAJourBoutonE();
+    }
+
+    void MettreAJourBoutonE()
+    {
+        if (boutonE == null || estPorte) return;
+
+        // Affiche le bouton uniquement si cet objet est le plus proche ET dans le range
+        ObjetPortable objetLePlusProche = TrouverObjetLePlusProche(joueur.position);
+        bool doitAfficher = (objetLePlusProche == this);
+
+        if (boutonE.activeSelf != doitAfficher)
+            boutonE.SetActive(doitAfficher);
     }
 
     void Ramasser()
     {
         if (objetPorteActuel != null && objetPorteActuel != this)
             return;
+
+        if (boutonE != null)
+            boutonE.SetActive(false);
 
         IgnorerCollisionAvecObstacle(true);
         rb.isKinematic = true;
@@ -258,6 +281,9 @@ public class ObjetPortable : MonoBehaviour
     void OnDisable()
     {
         objetsPortables.Remove(this);
+
+        if (boutonE != null)
+            boutonE.SetActive(false);
 
         if (objetPorteActuel == this)
             objetPorteActuel = null;
