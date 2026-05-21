@@ -286,4 +286,9 @@ public class ObjetPortable : MonoBehaviour
         if (objetPorteActuel == this)
             objetPorteActuel = null;
     }
+
+    public static bool EstPorteActuellement(GameObject go)
+    {
+        return objetPorteActuel != null && objetPorteActuel.gameObject == go;
+    }
 }

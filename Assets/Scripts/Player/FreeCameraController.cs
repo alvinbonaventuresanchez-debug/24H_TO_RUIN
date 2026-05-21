@@ -377,6 +377,7 @@ public class FreeCameraController : MonoBehaviour
             return;
         }
 
+        // Lance le son de l'easter egg lorsque la séquence est validée.
         PlaySixEasterEggAudio();
         easterEggElapsed = 0f;
     }
@@ -472,6 +473,7 @@ public class FreeCameraController : MonoBehaviour
         }
 
         EnsureSixEasterEggAudioSource();
+        // Redémarre le clip depuis le début pour chaque activation de l'easter egg.
         sixEasterEggAudioSource.Stop();
         sixEasterEggAudioSource.clip = sixEasterEggClip;
         sixEasterEggAudioSource.loop = loopSixEasterEggClip;
@@ -482,6 +484,7 @@ public class FreeCameraController : MonoBehaviour
 
     private void StopSixEasterEggAudio()
     {
+        // Coupe le son si l'easter egg est arrêté prématurément ou à la fin.
         if (sixEasterEggAudioSource != null && sixEasterEggAudioSource.isPlaying)
         {
             sixEasterEggAudioSource.Stop();
