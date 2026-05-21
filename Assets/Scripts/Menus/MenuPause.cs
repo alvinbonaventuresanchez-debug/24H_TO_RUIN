@@ -10,6 +10,7 @@ public class MenuPause : MonoBehaviour
     {
         panelPause.SetActive(false);
         panelOption.SetActive(false);
+        Time.timeScale = 1; 
     }
 //ouvrir et fermer les options
     public void OpenOptions(){
