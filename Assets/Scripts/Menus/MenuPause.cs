@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class MenuPause : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class MenuPause : MonoBehaviour
 //Quitter la partie
     public void leave(){
     Debug.Log("Quitter la partie");
-    //changement de scène à ajouter !
+    SceneManager.LoadScene("MainMenu");
     }
 
 

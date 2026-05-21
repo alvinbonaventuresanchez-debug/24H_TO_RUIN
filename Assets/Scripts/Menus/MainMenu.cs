@@ -15,7 +15,7 @@ public class MainMenu : MonoBehaviour
 	
 	public void PlayGame(){
 		Debug.Log("Lancer la partie");
-		SceneManager.LoadScene("Level1");
+		SceneManager.LoadScene("Gameplay");
 	}
 	
 	public void OpenOptions(){
