@@ -7,6 +7,9 @@ public class ObjetPortable : MonoBehaviour
     public Vector3 offsetPosition = new Vector3(0f, -0.16f, 0.31f);
     public float distanceInteraction = 2f;
 
+    [Header("UI")]
+    public GameObject indicateurE;
+
     private static readonly System.Collections.Generic.List<ObjetPortable> objetsPortables = new System.Collections.Generic.List<ObjetPortable>();
     private static ObjetPortable objetPorteActuel;
     private static int frameDerniereInteraction = -1;
@@ -52,7 +55,25 @@ public class ObjetPortable : MonoBehaviour
     void Update()
     {
         if (joueur == null || cam == null)
+        {
+            if (indicateurE != null)
+                indicateurE.SetActive(false);
             return;
+        }
+
+        // Affichage de l'indicateur
+        if (indicateurE != null)
+        {
+            if (!estPorte)
+            {
+                float distance = Vector3.Distance(PointInteractionMonde(), joueur.position);
+                indicateurE.SetActive(distance <= distanceInteraction);
+            }
+            else
+            {
+                indicateurE.SetActive(false);
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.E))
             GererInteraction();
@@ -79,6 +100,9 @@ public class ObjetPortable : MonoBehaviour
         rb.isKinematic = false;
         rb.useGravity = true;
         estPorte = false;
+
+        if (indicateurE != null)
+            indicateurE.SetActive(false);
 
         if (objetPorteActuel == this)
             objetPorteActuel = null;
