@@ -12,6 +12,7 @@ public class AudioManager : MonoBehaviour
 		[SerializeField] public AudioClip sfx_heal;
 		[SerializeField] public AudioClip sfx_end;
 		[SerializeField] public AudioClip sfx_hit;
+		[SerializeField] public AudioClip sfx_clic;
 	}
 
 	public MusicList music_list = new MusicList();
