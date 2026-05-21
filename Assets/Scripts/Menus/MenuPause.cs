@@ -48,7 +48,7 @@ public class MenuPause : MonoBehaviour
             OpenPause(newState);
             Debug.Log("Close options");
             panelOption.SetActive(false);
-            
+
             //à ajouter : faire pause sur le gameplay, le timer, etc 
         }
     }
@@ -58,5 +58,6 @@ public class MenuPause : MonoBehaviour
             Cursor.lockState = newState ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = newState;
             panelPause.SetActive(newState);
+            Time.timeScale = newState ? 0 : 1; 
     }
 }
