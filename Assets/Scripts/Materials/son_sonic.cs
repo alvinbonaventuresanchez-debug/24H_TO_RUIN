@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ProximitySound : MonoBehaviour
 {
-    public float distance = 1f;
+    public float distance = 1.5f;
     public AudioSource musiqueprincipale;
     private AudioSource audioSource;
     private Transform player;
