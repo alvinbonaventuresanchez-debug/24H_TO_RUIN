@@ -8,14 +8,26 @@ public class MainMenu : MonoBehaviour
 	public GameObject panelOption;
 	public GameObject panelCredits;
 
+	public static bool cinematic = false;
+
 	void Start(){
 		panelOption.SetActive(false);
 		panelCredits.SetActive(false);
 	}
 	
 	public void PlayGame(){
-		Debug.Log("Lancer la partie");
-		SceneManager.LoadScene("Gameplay");
+		if(cinematic)
+		{
+			Debug.Log("Lancer la partie");
+			SceneManager.LoadScene("Gameplay");
+		}
+		else
+		{
+			cinematic = true;
+			Debug.Log("Lancer la partie");
+			SceneManager.LoadScene("début");
+		}
+
 	}
 	
 	public void OpenOptions(){
